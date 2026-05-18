@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: stellar-raide-tariff-shield-postgres
+    environment:
+      POSTGRES_DB: stellar-raide-tariff-shield
+      POSTGRES_USER: stellar-raide-tariff-shield
+      POSTGRES_PASSWORD: stellar-raide-tariff-shield_dev_password
+    ports:
+      - "5443:5432"
+    volumes:
+      - stellar-raide-tariff-shield_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stellar-raide-tariff-shield -d stellar-raide-tariff-shield"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  stellar-raide-tariff-shield_pg:
