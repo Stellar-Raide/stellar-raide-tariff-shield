@@ -30,6 +30,8 @@ export interface stellar-raide-tariff-shieldClientOptions {
   networkPassphrase: string;
   /** Optional: allow tests to override the timeout. */
   txTimeoutSeconds?: number;
+  /** Optional: custom rpc.Server instance */
+  server?: rpc.Server;
 }
 
 const DEFAULT_FEE = "1000000"; // 0.1 XLM — generous for Soroban invocations
@@ -48,7 +50,7 @@ export class stellar-raide-tariff-shieldClient {
   private readonly txTimeoutSeconds: number;
 
   constructor(opts: stellar-raide-tariff-shieldClientOptions) {
-    this.server = new rpc.Server(opts.rpcUrl, { allowHttp: opts.rpcUrl.startsWith("http://") });
+    this.server = opts.server ?? new rpc.Server(opts.rpcUrl, { allowHttp: opts.rpcUrl.startsWith("http://") });
     this.contract = new Contract(opts.contractId);
     this.networkPassphrase = opts.networkPassphrase;
     this.txTimeoutSeconds = opts.txTimeoutSeconds ?? 30;
