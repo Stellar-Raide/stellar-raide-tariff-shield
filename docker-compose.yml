@@ -10,11 +10,65 @@ services:
       - "5443:5432"
     volumes:
       - stellar-raide-tariff-shield_pg:/var/lib/postgresql/data
+    networks:
+      - stellar-raide-tariff-shield-net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U stellar-raide-tariff-shield -d stellar-raide-tariff-shield"]
       interval: 5s
       timeout: 5s
       retries: 10
+
+  api:
+    build:
+      context: apps/api
+      dockerfile: Dockerfile
+    container_name: stellar-raide-tariff-shield-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - apps/api/.env
+    environment:
+      DATABASE_URL: postgres://stellar-raide-tariff-shield:stellar-raide-tariff-shield_dev_password@postgres:5432/stellar-raide-tariff-shield
+    ports:
+      - "3002:3002"
+    networks:
+      - stellar-raide-tariff-shield-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3002/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: apps/web
+      dockerfile: Dockerfile
+    container_name: stellar-raide-tariff-shield-web
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3002
+    ports:
+      - "3000:3000"
+    networks:
+      - stellar-raide-tariff-shield-net
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: stellar-raide-tariff-shield-jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"
+      - "4318:4318"
+    networks:
+      - stellar-raide-tariff-shield-net
+
+networks:
+  stellar-raide-tariff-shield-net:
+    driver: bridge
 
 volumes:
   stellar-raide-tariff-shield_pg:
