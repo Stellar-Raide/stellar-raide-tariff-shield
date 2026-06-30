@@ -1,0 +1,7 @@
+{
+  "extends": ["stellar-raide-tariff-shield"],
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "ignorePatterns": ["dist/**", "node_modules/**"]
+}
