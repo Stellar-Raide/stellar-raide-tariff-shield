@@ -1,6 +1,7 @@
 # stellar-raide-tariff-shield
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/Stellar-Raide/stellar-raide-tariff-shield)
+[![TypeScript Type Check](https://github.com/Stellar-Raide/stellar-raide-tariff-shield/actions/workflows/typecheck.yml/badge.svg)](https://github.com/Stellar-Raide/stellar-raide-tariff-shield/actions/workflows/typecheck.yml)
 
 > Programmable customs-bond collateral. US importers post yield-bearing USDC instead of dead-weight cash collateral; a Soroban smart contract auto-tops-up the bond during tariff spikes; the surety partner keeps emergency clawback authority.
 
