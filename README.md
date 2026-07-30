@@ -66,7 +66,7 @@ stellar-raide-tariff-shield/
 
 One git repo. `npm workspaces` resolves the TypeScript packages; `cargo workspace` resolves the Rust contract. `docker compose up` brings up Postgres. See [docs/dep-graph.md](./docs/dep-graph.md) for package dependency visualization.
 
-## Full-stack Docker
+## Local Development (Full-stack Docker)
 
 Bring up the entire stellar-raide-tariff-shield stack — Postgres, API, web, and Jaeger — with a single command:
 
