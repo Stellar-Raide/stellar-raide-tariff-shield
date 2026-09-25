@@ -3682,3 +3682,80 @@ importersRouter.get('/:id/tariff-history', async (req: Request, res: Response) =
   }
 });
 
+
+// ── Importer Peer Benchmark Comparison (#1021) ───────────────────────────────
+
+// GET /importers/:id/peer-benchmark — Percentile Ranking within Industry/Size Cohort
+importersRouter.get('/:id/peer-benchmark', async (req: Request, res: Response) => {
+  const importerId = String(req.params.id ?? '');
+  const importer = await loadImporterFor(req, importerId);
+  if (!importer) {
+    res.status(404).json({ error: 'importer not found' });
+    return;
+  }
+
+  try {
+    const importerDetails = await pool.query(
+      `SELECT i.id, br.state_code, br.bond_amount
+       FROM importers i
+       JOIN bond_records br ON br.importer_id = i.id
+       WHERE i.id = $1
+       ORDER BY br.created_at DESC LIMIT 1`,
+      [importerId]
+    );
+
+    if (!importerDetails.rowCount) {
+      res.status(404).json({ error: 'importer bond metrics missing' });
+      return;
+    }
+
+    const bondAmount = Number(importerDetails.rows[0].bond_amount || 0);
+    const sizeCohort = bondAmount < 100000 ? 'small' : bondAmount < 1000000 ? 'medium' : 'large';
+
+    const cohortScores = await pool.query(
+      `SELECT i.id, 
+              ROUND(LEAST(100, (br.bond_amount * 100 / NULLIF(br.cbp_minimum_required, 0))) * 0.7 + 30) AS health_score
+       FROM importers i
+       JOIN bond_records br ON br.importer_id = i.id
+       WHERE i.deleted_at IS NULL
+         AND (
+           CASE 
+             WHEN br.bond_amount < 100000 THEN 'small'
+             WHEN br.bond_amount < 1000000 THEN 'medium'
+             ELSE 'large'
+           END
+         ) = $1`,
+      [sizeCohort]
+    );
+
+    const totalMembers = cohortScores.rowCount || 0;
+    const MINIMUM_ANONYMITY_THRESHOLD = 5;
+
+    if (totalMembers < MINIMUM_ANONYMITY_THRESHOLD) {
+      res.json({
+        suppressed: true,
+        reason: 'Cohort size too small to preserve anonymity',
+        cohortSize: totalMembers,
+      });
+      return;
+    }
+
+    const sortedScores = cohortScores.rows.map((r) => ({ id: r.id, score: Number(r.health_score) })).sort((a, b) => a.score - b.score);
+    const targetIndex = sortedScores.findIndex((s) => s.id === importerId);
+    const rank = targetIndex >= 0 ? targetIndex + 1 : 1;
+    const percentile = Math.round(((rank - 0.5) / totalMembers) * 100);
+
+    res.json({
+      suppressed: false,
+      cohort: {
+        sizeCohort,
+        memberCount: totalMembers,
+      },
+      percentile,
+      medianScore: sortedScores[Math.floor(totalMembers / 2)]?.score || 50,
+    });
+  } catch (err: any) {
+    console.error('[importers] failed to calculate peer benchmark:', err);
+    res.status(500).json({ error: 'failed to calculate peer benchmark' });
+  }
+});

@@ -261,8 +261,61 @@ export function HealthScore({
             </div>
           </div>
         </div>
+        <PeerBenchmarkIndicator importerId={importerId} />
       </div>
     </div>
   );
 }
+
+interface PeerBenchmarkData {
+  suppressed: boolean;
+  reason?: string;
+  cohort?: {
+    sizeCohort: string;
+    memberCount: number;
+  };
+  percentile?: number;
+  medianScore?: number;
+}
+
+export function PeerBenchmarkIndicator({ importerId }: { importerId?: string }) {
+  const [benchmark, setBenchmark] = useState<PeerBenchmarkData | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!importerId) return;
+    setLoading(true);
+    fetch(`/api/importers/${importerId}/peer-benchmark`)
+      .then((res) => res.json())
+      .then((data) => setBenchmark(data))
+      .catch(() => setBenchmark(null))
+      .finally(() => setLoading(false));
+  }, [importerId]);
+
+  if (loading || !benchmark) return null;
+
+  if (benchmark.suppressed) {
+    return (
+      <div className="mt-2 text-[10px] text-muted italic">
+        Peer benchmark suppressed (cohort size &lt; 5 for privacy).
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-3 rounded-md bg-accent/5 border border-accent/20 p-2.5 text-xs flex items-center justify-between">
+      <div>
+        <span className="font-semibold text-foreground">Peer Benchmark:</span>{' '}
+        <span className="text-accent font-bold">{benchmark.percentile}th Percentile</span>
+        <span className="text-muted text-[10px] block">
+          Compared to {benchmark.cohort?.memberCount} peers in {benchmark.cohort?.sizeCohort} cohort
+        </span>
+      </div>
+      <div className="text-right text-[10px] text-muted">
+        Median: <span className="font-semibold text-foreground">{benchmark.medianScore} pts</span>
+      </div>
+    </div>
+  );
+}
+
 
