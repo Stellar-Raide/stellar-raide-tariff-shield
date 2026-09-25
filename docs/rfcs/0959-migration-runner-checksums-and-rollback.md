@@ -75,7 +75,7 @@ It is also exactly the scenario in (2): two PRs each took "the next number",
 and merged in sequence. If either pair was applied in an environment before
 its twin merged, `MAX(version)` skipped the twin permanently. Which files
 actually ran where is knowable from `schema_migrations.name` in each
-environment, and must be checked before renumbering (section 4).
+environment, and must be checked before renumbering (section 3).
 
 ## 2. Options
 
@@ -102,7 +102,7 @@ Changes:
 6. **Non-transactional migrations** record a *started* row state (or a
    `status` column: `applying` / `applied`) so an interrupted `CONCURRENTLY`
    migration is reported as "needs manual cleanup" instead of blindly retried.
-7. **Static checks script** (`scripts/check-migrations.mjs`, section 5).
+7. **Static checks script** (`scripts/check-migrations.mjs`, section 4).
 
 Size: the runner is ~170 lines; this is one new column, a hash loop and a lock,
 plus tests.
