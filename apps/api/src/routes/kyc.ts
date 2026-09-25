@@ -192,7 +192,7 @@ kycRouter.post('/:id/kyc', async (req: Request, res: Response) => {
 
   const parse = UploadKycSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
 
@@ -236,7 +236,7 @@ kycRouter.post('/:id/kyc/batch', async (req: Request, res: Response) => {
 
   const parse = UploadKycBatchSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
 
@@ -337,7 +337,7 @@ kycRouter.patch('/:id/kyc', requireRole('surety_admin'), async (req: Request, re
 
   const parse = UpdateKycStatusSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
 

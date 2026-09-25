@@ -17,6 +17,7 @@ All error responses follow one of two shapes:
 ```json
 {
   "error": "invalid input",
+  "target": "body",
   "details": [
     {
       "code": "too_small",
@@ -32,6 +33,16 @@ All error responses follow one of two shapes:
 ```
 
 The `details` array is **only present on 400 and 422 responses** that originate from schema validation. Other error responses contain only `"error"`.
+
+### Validation error message convention
+
+Zod validation failures always use the message `"invalid input"`, whether the
+body or the query string failed validation. The `target` field says which
+part of the request was rejected: `"body"` or `"query"`. (#974 replaced the
+older `"invalid query params"`, `"invalid query parameters"` and
+`"invalid query"` messages in the admin, auth, importers, erasure, kyc and
+surety-license routers with this shape.) Match on `error` to detect a
+validation failure and on `target` to tell the two apart.
 
 ### Field naming convention
 

@@ -48,6 +48,11 @@ export const openApiSpec = {
         required: ['error'],
         properties: {
           error: { type: 'string', example: 'invalid input' },
+          target: {
+            type: 'string',
+            enum: ['body', 'query'],
+            description: 'On validation failures, which part of the request failed schema validation',
+          },
           details: { type: 'array', items: { type: 'object' } },
         },
       },
