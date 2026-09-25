@@ -75,7 +75,7 @@ importersRouter.post('/', async (req: Request, res: Response) => {
 
   const parse = CreateImporterSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
   const { legalName, ein, bondId, initialRequiredCollateral, businessState } = parse.data;
@@ -258,7 +258,7 @@ importersRouter.get('/admin/events', async (req: Request, res: Response) => {
 
   const parse = AdminEventsQuerySchema.safeParse(req.query);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid query parameters', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'query', details: parse.error.issues });
     return;
   }
 
@@ -449,7 +449,7 @@ importersRouter.post('/admin/approval-chains', async (req: Request, res: Respons
 
   const parse = CreateApprovalChainSchema.safeParse(req.body ?? {});
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
   const { name, steps } = parse.data;
@@ -503,7 +503,7 @@ importersRouter.post('/admin/:id/review/start', async (req: Request, res: Respon
   }
   const parse = z.object({ chainId: z.string().uuid().optional() }).safeParse(req.body ?? {});
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
 
@@ -600,7 +600,7 @@ importersRouter.post('/admin/:id/review/decision', async (req: Request, res: Res
     })
     .safeParse(req.body ?? {});
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
   const { decision, note } = parse.data;
@@ -818,7 +818,7 @@ importersRouter.post('/:id/members/invite', async (req: Request, res: Response) 
 
   const parse = InviteTeamMemberSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
   const { email, role } = parse.data;
@@ -999,7 +999,7 @@ importersRouter.get('/:id/events', async (req: Request, res: Response) => {
 
   const parse = EventsQuerySchema.safeParse(req.query);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid query', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'query', details: parse.error.issues });
     return;
   }
   const { limit, cursor } = parse.data;
@@ -1261,8 +1261,7 @@ async function evaluateTariffAlerts(
         alert.id,
       ]);
       // #230 (notifications table) isn't implemented anywhere in this codebase
-      // yet — see implementation.md for the scope reconciliation. Nothing to
-      // insert into here until that lands.
+      // yet. Nothing to insert into here until that lands.
     }
   }
 }
@@ -1286,7 +1285,7 @@ importersRouter.post('/:id/upload-tariff-csv', async (req: Request, res: Respons
 
   const parse = TariffUploadSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
 
@@ -1547,7 +1546,7 @@ importersRouter.post('/:id/deposit', async (req: Request, res: Response) => {
 
   const parse = DepositSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input' });
+    res.status(400).json({ error: 'invalid input', target: 'body' });
     return;
   }
 
@@ -1632,7 +1631,7 @@ async function handleAttachDisputeEvidence(req: Request, res: Response): Promise
 
   const parse = AttachDisputeEvidenceSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
 
@@ -1850,7 +1849,7 @@ importersRouter.post('/:id/deposit-schedule', async (req: Request, res: Response
 
   const parse = CreateDepositScheduleSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
 
@@ -2071,7 +2070,7 @@ importersRouter.patch('/:id/deposit-schedule/:scheduleId', async (req: Request, 
 
   const parse = UpdateDepositScheduleSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
 
@@ -2186,7 +2185,7 @@ importersRouter.put('/:id/dual-approval', async (req: Request, res: Response) =>
 
   const parse = DualApprovalConfigSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
 
@@ -2442,7 +2441,7 @@ importersRouter.post('/:id/withdraw', async (req: Request, res: Response) => {
 
   const parse = WithdrawSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
 
@@ -2556,7 +2555,7 @@ importersRouter.post('/:id/scheduled-withdrawals', async (req: Request, res: Res
 
   const parse = CreateScheduledWithdrawalSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
 
@@ -2707,7 +2706,7 @@ importersRouter.post('/:id/sku-mappings/bulk', async (req: Request, res: Respons
 
   const parse = BulkSkuMappingSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
 
@@ -2845,7 +2844,7 @@ importersRouter.post('/:id/sku-mappings', async (req: Request, res: Response) =>
 
   const parse = SkuMappingItemSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
 
@@ -2885,7 +2884,7 @@ importersRouter.put('/:id/sku-mappings/:mappingId', async (req: Request, res: Re
 
   const parse = SkuMappingItemSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
 
@@ -3055,7 +3054,7 @@ importersRouter.post(
     }
     const parse = YieldSchema.safeParse(req.body);
     if (!parse.success) {
-      res.status(400).json({ error: 'invalid input' });
+      res.status(400).json({ error: 'invalid input', target: 'body' });
       return;
     }
     const jobId = await enqueueTxSubmit({
@@ -3131,7 +3130,7 @@ importersRouter.post('/:id/verify-oracle-data', async (req: Request, res: Respon
 
   const parse = VerifyOracleSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
 
@@ -3256,8 +3255,7 @@ importersRouter.get('/:id/bonds', async (req: Request, res: Response) => {
 // (multer/busboy) or AWS SDK client is installed anywhere in this codebase,
 // so uploads are accepted as a base64 payload in the JSON body and the S3
 // calls are stubbed behind `env.S3_DOCUMENTS_BUCKET`, exactly like those
-// other document flows already do. See implementation.md for the full
-// rationale.
+// other document flows already do.
 
 const DOCUMENT_KINDS = [
   'cbp_301',
@@ -3324,7 +3322,7 @@ importersRouter.post('/:id/documents', async (req: Request, res: Response) => {
   // instead of surfacing as a raw Postgres constraint-violation error.
   const parse = UploadDocumentSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
   const { kind, filename, fileBase64, mimeType, expiresAt } = parse.data;
@@ -3635,7 +3633,7 @@ importersRouter.get('/:id/tariff-history', async (req: Request, res: Response) =
 
   const parse = TariffHistoryQuerySchema.safeParse(req.query);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid query parameters', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'query', details: parse.error.issues });
     return;
   }
   const { htsCode, startDate, endDate } = parse.data;

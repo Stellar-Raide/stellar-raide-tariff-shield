@@ -1,72 +1,13 @@
-# stellar-raide-tariff-shield Issue Implementations
+# Feature Design Notes
 
-This document tracks the implementations completed to resolve issues #289, #285, #283, and #288.
-
----
-
-## 1. Issue #289: Mermaid Architecture Diagrams
-
-We added three Mermaid diagrams to [ARCHITECTURE.md](file:///c:/Users/PAB-NETWORK/Downloads/stellar-raide-tariff-shield/ARCHITECTURE.md) to describe system topology and key sequence flows.
-
-### System Topology Diagram
-A top-down (`graph TD`) layout showing the flow of communication:
-* Browser/Client UI connects to the Next.js Frontend (Vercel) via HTTPS.
-* Next.js Frontend connects to the Express API (Render) via HTTPS / JWT.
-* Express API connects to the PostgreSQL Database (CRM mirror) via SQL.
-* Express API invokes the SDK (`stellar-raide-tariff-shieldClient`), which calls the Soroban Contract via Soroban RPC JSON-RPC protocols.
-* A clear line style legend was added at the bottom: solid lines represent synchronous calls, while dashed lines represent asynchronous event emissions and indexing.
-
-### Sequence Diagram: Tariff Spike & Auto-Top-Up Flow
-A diagram showing how the system acts when a tariff spike occurs:
-* `CBP Webhook` pushes CSV/estimates to the `Express API`.
-* `Express API` saves the `tariff_upload` to `PostgreSQL`.
-* `Express API` calculates and invokes `setRequiredCollateral` on-chain using the `stellar-raide-tariff-shieldClient` SDK.
-* If a collateral shortfall is detected, the `Express API` invokes `autoTopUp` on-chain.
-* The `stellar-raide-tariff-shieldContract` moves funds from reserve to collateral, emits the `topup` event, which the `Express API` captures and mirrors into the `contract_events` database log.
-
-### Sequence Diagram: Surety Admin Clawback Flow
-A diagram showing the emergency clawback procedure:
-* The `Surety Admin UI` requests a clawback action.
-* The `Express API` performs role-based authorization verification (`surety_admin`).
-* The API invokes the `clawback` method on the `stellar-raide-tariff-shieldClient` SDK.
-* The SDK calls `clawback` on `stellar-raide-tariff-shieldContract`, draining balances to the surety wallet and freezing the account.
-* The contract emits a `clawback` event, which is mirrored by the `Express API` to the database audit logs.
-* A response is returned back to the UI.
+Design specs for importer- and admin-facing features: the data model, API
+surface and UI each one was built around. For the system as a whole, see
+[ARCHITECTURE.md](../ARCHITECTURE.md). For what changed in each release, see
+[CHANGELOG.md](../CHANGELOG.md).
 
 ---
 
-## 2. Issue #285: CI Formatting and Clippy Lints Gate
-
-We created a linting gate for contract Rust code.
-* **Format Configuration**: Created [rustfmt.toml](file:///c:/Users/PAB-NETWORK/Downloads/stellar-raide-tariff-shield/rustfmt.toml) in the repository root to specify strict format limits (`max_width = 100` and `edition = "2021"`).
-* **CI Integration**: Modified [.github/workflows/ci.yml](file:///c:/Users/PAB-NETWORK/Downloads/stellar-raide-tariff-shield/.github/workflows/ci.yml) to include parallel `fmt` and `clippy` jobs. Both jobs utilize the same cargo cache keys as the test job to avoid rebuilding dependencies.
-* **Pre-commit Hook Suggestion**: Added explicit guidelines on configuring a local git `pre-commit` hook to automatically check Rust formatting locally in [CONTRIBUTING.md](file:///c:/Users/PAB-NETWORK/Downloads/stellar-raide-tariff-shield/CONTRIBUTING.md).
-
----
-
-## 3. Issue #283: Automated Changelog Generation
-
-We integrated the Conventional Commit standard with automated changelog updates.
-* **Dependencies**: Added `conventional-changelog-cli` to `devDependencies` in [package.json](file:///c:/Users/PAB-NETWORK/Downloads/stellar-raide-tariff-shield/package.json).
-* **Script**: Added a `"changelog"` script: `"conventional-changelog -p angular -i CHANGELOG.md -s"`.
-* **Baseline Changelog**: Generated a retroactive, complete history from commit history in [CHANGELOG.md](file:///c:/Users/PAB-NETWORK/Downloads/stellar-raide-tariff-shield/CHANGELOG.md) using `npx conventional-changelog -p angular -i CHANGELOG.md -s -r 0`.
-* **Readme Reference**: Linked the changelog within [README.md](file:///c:/Users/PAB-NETWORK/Downloads/stellar-raide-tariff-shield/README.md) under the "Changelog" heading.
-
----
-
-## 4. Issue #288: Deployment and Verification Guide
-
-We wrote a detailed step-by-step deploy runbook in [docs/deployment.md](file:///c:/Users/PAB-NETWORK/Downloads/stellar-raide-tariff-shield/docs/deployment.md).
-* **Prerequisites**: Clearly listed tools and version bounds for Node.js 20, Rust target wasm32, Stellar CLI, Docker, and Render/Vercel platforms.
-* **Env Config Reference**: Mapped out a table of all environment variables for both API and Web configurations with example values, validation types, and risk levels.
-* **Soroban Commands**: Documented commands for compiling (`cargo build`), optimizing (`stellar contract optimize`), deploying (`stellar contract deploy`), and initializing (`stellar contract invoke`) on testnet/mainnet.
-* **Render & Vercel**: Provided templates for `render.yaml` service settings, instructions to deploy containerized APIs on Render, and linking/deploying web assets using `vercel --prod`.
-* **Post-Deploy Smoke Tests**: Outlined three checks to verify API health (`/health`), sign up (`/auth/signup`), and inspect on-chain account state (`get_account`).
-* **Rollback Actions**: Outlined rollback steps for Vercel, Render revisions, and multi-sig Soroban contract upgrades via `propose_upgrade`.
-
----
-
-## 5. Issue #1015: Importer Sub-Account / Team Member Invites with Role-Based Permissions
+## 1. Importer Sub-Account / Team Member Invites with Role-Based Permissions (#1015)
 
 ### Architecture & System Design
 To enable importer organization staff (finance, compliance, ops) to collaborate under a unified importer account without sharing credentials, we introduce a hierarchical Sub-Account and Team Member RBAC architecture.
@@ -135,7 +76,7 @@ CREATE INDEX idx_team_members_invite_hash ON importer_team_members(invite_token_
 
 ---
 
-## 6. Issue #1017: Configurable Alert Thresholds for Collateral Health Score
+## 2. Configurable Alert Thresholds for Collateral Health Score (#1017)
 
 ### Architecture & System Design
 Importers require proactive notifications when collateral coverage or reserve levels fluctuate near critical limits. We implement configurable per-importer threshold settings while retaining fallback defaults.
@@ -181,7 +122,7 @@ CREATE TABLE importer_health_thresholds (
 
 ---
 
-## 7. Issue #1018: Bulk Oracle Signer Rotation Workflow UI for Surety Admins
+## 3. Bulk Oracle Signer Rotation Workflow UI for Surety Admins (#1018)
 
 ### Architecture & System Design
 Soroban smart contract function `update_oracle_signers(env, new_signers, approvals)` requires a 2-of-3 multi-signature consensus among current signers. We build an administrative workflow service and UI for proposing, tracking, collecting approvals, and executing signer updates on-chain.
@@ -245,7 +186,7 @@ CREATE INDEX idx_signer_rotations_status ON oracle_signer_rotations(status);
 
 ---
 
-## 8. Issue #1019: Historical Tariff Rate Trend Charting on Importer Dashboard
+## 4. Historical Tariff Rate Trend Charting on Importer Dashboard (#1019)
 
 ### Architecture & System Design
 Importers require visibility into how historical duty rates for specific Harmonized Tariff Schedule (HTS) codes have trended over time. We implement a read-only historical analytics service and dashboard line chart.
@@ -295,4 +236,3 @@ CREATE INDEX idx_hts_rate_history_lookup ON hts_rate_history(hts_code, effective
   * Query Execution: $O(\log N + K)$ using B-tree index `idx_hts_rate_history_lookup`, where $N$ is total historical rate entries and $K$ is the number of points in the date range.
   * Rendering: $O(K)$ canvas/SVG element points.
 * **Space Complexity**: $O(K)$ memory footprint for transmitted time-series points.
-

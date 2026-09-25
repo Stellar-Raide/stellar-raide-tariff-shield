@@ -36,7 +36,7 @@ const AuditLogQuerySchema = z.object({
 adminRouter.get('/audit-log', requireRole('surety_admin'), async (req: Request, res: Response) => {
   const parse = AuditLogQuerySchema.safeParse(req.query);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid query params', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'query', details: parse.error.issues });
     return;
   }
   const {
@@ -237,7 +237,7 @@ adminRouter.post(
       .safeParse(req.body);
 
     if (!parse.success) {
-      res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+      res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
       return;
     }
     const { versionId, effectiveDate, changeSummary, policyText, requiresReacceptance } =
@@ -301,7 +301,7 @@ adminRouter.post(
       .safeParse(req.body);
 
     if (!parse.success) {
-      res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+      res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
       return;
     }
 
@@ -346,7 +346,7 @@ adminRouter.get(
   async (req: Request, res: Response) => {
     const parse = OracleFeedQuerySchema.safeParse(req.query);
     if (!parse.success) {
-      res.status(400).json({ error: 'invalid query params', details: parse.error.issues });
+      res.status(400).json({ error: 'invalid input', target: 'query', details: parse.error.issues });
       return;
     }
     const { importer_id, from, to, page, per_page } = parse.data;
@@ -422,7 +422,7 @@ adminRouter.get(
     const filterSchema = OracleFeedQuerySchema.omit({ page: true, per_page: true });
     const parse = filterSchema.safeParse(req.query);
     if (!parse.success) {
-      res.status(400).json({ error: 'invalid query params', details: parse.error.issues });
+      res.status(400).json({ error: 'invalid input', target: 'query', details: parse.error.issues });
       return;
     }
     const { importer_id, from, to } = parse.data;
@@ -564,7 +564,7 @@ adminRouter.post(
   async (req: Request, res: Response) => {
     const parse = BatchAutoTopUpSchema.safeParse(req.body ?? {});
     if (!parse.success) {
-      res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+      res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
       return;
     }
     const { importer_ids } = parse.data;
@@ -663,7 +663,7 @@ adminRouter.post('/credit-lines', requireRole('surety_admin'), async (req: Reque
   const user = (req as AuthedRequest).user;
   const parse = GrantCreditLineSchema.safeParse(req.body ?? {});
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
   const { importerId, amount, expiresAt, durationHours, reason } = parse.data;
@@ -726,7 +726,7 @@ const ListCreditLinesQuerySchema = z.object({
 adminRouter.get('/credit-lines', requireRole('surety_admin'), async (req: Request, res: Response) => {
   const parse = ListCreditLinesQuerySchema.safeParse(req.query ?? {});
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid query params', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'query', details: parse.error.issues });
     return;
   }
 
@@ -763,7 +763,7 @@ adminRouter.post(
     const user = (req as AuthedRequest).user;
     const parse = z.object({ reason: z.string().max(500).optional() }).safeParse(req.body ?? {});
     if (!parse.success) {
-      res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+      res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
       return;
     }
 
@@ -925,7 +925,7 @@ adminRouter.post(
     const user = (req as AuthedRequest).user;
     const parse = ResolveDisputeSchema.safeParse(req.body ?? {});
     if (!parse.success) {
-      res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+      res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
       return;
     }
     const { accept, note } = parse.data;
@@ -998,7 +998,7 @@ adminRouter.post('/oracle-signers/propose', requireRole('surety_admin'), async (
   const user = (req as AuthedRequest).user;
   const parse = ProposeRotationSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
   const { newSigners } = parse.data;

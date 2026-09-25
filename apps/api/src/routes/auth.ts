@@ -79,7 +79,7 @@ const SignupSchema = z.object({
 authRouter.post('/signup', async (req: Request, res: Response) => {
   const parse = SignupSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
   const { email, password, role, privacyPolicyVersionId } = parse.data;
@@ -172,7 +172,7 @@ const LoginSchema = z.object({
 authRouter.post('/login', async (req: Request, res: Response) => {
   const parse = LoginSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input' });
+    res.status(400).json({ error: 'invalid input', target: 'body' });
     return;
   }
 
@@ -252,7 +252,7 @@ const RefreshSchema = z.object({
 authRouter.post('/refresh', async (req: Request, res: Response) => {
   const parse = RefreshSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input' });
+    res.status(400).json({ error: 'invalid input', target: 'body' });
     return;
   }
 
@@ -492,7 +492,7 @@ const AcceptTeamInviteSchema = z.object({
 authRouter.post('/team-invite/accept', async (req: Request, res: Response) => {
   const parse = AcceptTeamInviteSchema.safeParse(req.body);
   if (!parse.success) {
-    res.status(400).json({ error: 'invalid input', details: parse.error.issues });
+    res.status(400).json({ error: 'invalid input', target: 'body', details: parse.error.issues });
     return;
   }
   const { token, password } = parse.data;
