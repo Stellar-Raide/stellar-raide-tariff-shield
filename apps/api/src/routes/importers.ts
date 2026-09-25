@@ -1261,8 +1261,7 @@ async function evaluateTariffAlerts(
         alert.id,
       ]);
       // #230 (notifications table) isn't implemented anywhere in this codebase
-      // yet — see implementation.md for the scope reconciliation. Nothing to
-      // insert into here until that lands.
+      // yet. Nothing to insert into here until that lands.
     }
   }
 }
@@ -3256,8 +3255,7 @@ importersRouter.get('/:id/bonds', async (req: Request, res: Response) => {
 // (multer/busboy) or AWS SDK client is installed anywhere in this codebase,
 // so uploads are accepted as a base64 payload in the JSON body and the S3
 // calls are stubbed behind `env.S3_DOCUMENTS_BUCKET`, exactly like those
-// other document flows already do. See implementation.md for the full
-// rationale.
+// other document flows already do.
 
 const DOCUMENT_KINDS = [
   'cbp_301',

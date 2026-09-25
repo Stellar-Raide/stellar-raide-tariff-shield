@@ -23,8 +23,7 @@ notificationsRouter.use(tosReacceptanceGate);
 // GET /importers/:id/events (base64 "<created_at ISO>|<id>" keyset — see the
 // comment on that endpoint for the full rationale). Not shared as a common
 // utility with that endpoint: doing so would mean editing an unrelated,
-// already-working route in importers.ts, which is out of this issue's scope
-// (see implementation.md).
+// already-working route in importers.ts, which is out of this issue's scope.
 function decodeNotificationsCursor(raw: string): { createdAt: string; id: string } | null {
   try {
     const decoded = Buffer.from(raw, 'base64').toString('utf8');
