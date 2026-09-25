@@ -135,3 +135,23 @@ Response:
 ```json
 { "received": true }
 ```
+
+### Known gaps
+
+The behaviour above is what the webhook is designed to do. Integrators
+should be aware that the current implementation differs in a few ways:
+
+- **Signature check is effectively skipped today.** Verification only runs
+  when `DOCUSIGN_WEBHOOK_HMAC_KEY` is set, the `X-DocuSign-Signature-1` header
+  is present, **and** the raw request body is available as `req.rawBody`.
+  Nothing in `apps/api/src/index.ts` currently captures `rawBody` (the global
+  `express.json()` has no `verify` hook), so requests are accepted without
+  verification, and `signed_document_hash` is stored as `null`. A request
+  that simply omits the header is also accepted even when the key is set.
+- **Signature length mismatch.** A header whose length differs from the
+  expected base64 digest makes `crypto.timingSafeEqual` throw, so the
+  request fails with a `5xx` instead of `401`.
+- **Mount path.** `bondWebhookRouter` is mounted at `/bonds` and declares
+  the route as `/bonds/docusign-webhook`, so the handler is currently served
+  at `/bonds/bonds/docusign-webhook`. Check the deployed path before
+  configuring the Connect listener URL.
