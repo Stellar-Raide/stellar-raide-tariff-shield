@@ -18,14 +18,14 @@ Components and pages never call `fetch()` against the API directly.
 | `lib/api.ts` (`request()`) | `apps/api` via `NEXT_PUBLIC_API_URL` | The intended client. Injects `Authorization: Bearer`, throws `ApiError(status, message, details)`. ~680 lines, `api.*` namespace. |
 | `components/OracleSignerRotation.tsx` (4 calls) | relative `/api/admin/oracle-signers/*` | Bypasses `request()`: no auth header, own error handling. Relative path targets the Next.js origin, not `apps/api`. |
 | `components/HealthScore.tsx` | relative `/api/notifications/thresholds/:id` | Same problem; the result is not checked. |
-| `components/TariffRateChart.tsx` | external/rate endpoint | Own fetch and error handling. |
+| `components/TariffRateChart.tsx` | relative `/api/importers/:id/tariff-history` | Same problem; throws a generic `Error('Failed to load tariff history')`. |
 | `lib/currency.ts` | third-party FX endpoint | Legitimately not `apps/api`; out of scope. |
 
 Inconsistencies:
 
 1. Three components call `/api/...` relative paths. `apps/web` has no
-   `app/**/route.ts` handlers, so these paths only work if a proxy/rewrite is
-   configured; they bypass `NEXT_PUBLIC_API_URL`, the bearer token and `ApiError`.
+   `app/**/route.ts` handlers and `next.config.ts` defines no rewrites, so these
+   paths appear to resolve to nothing unless a proxy is configured elsewhere; they bypass `NEXT_PUBLIC_API_URL`, the bearer token and `ApiError`.
 2. Error handling is duplicated: `request()` throws `ApiError`, which
    `lib/error-formatter.ts` (`formatApiError`) understands. Ad hoc call sites
    do not, so users see raw messages.

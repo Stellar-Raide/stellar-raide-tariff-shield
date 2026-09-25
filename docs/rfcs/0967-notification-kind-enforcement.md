@@ -31,8 +31,8 @@ Callers using the constant (import `NOTIFICATION_KINDS`): `services/onboarding-d
 | `jobs/sla-breach-checker.ts:61` | `'sla_breach'` | Yes (`SLA_BREACH`), value matches, but not enforced |
 | `jobs/compliance-escalation.ts:107` | `'compliance_escalation'` | **No**, an unregistered kind |
 
-`services/upgrade-notifications.ts` passes a `kind` variable, which must be
-checked to confirm its values come from the registry.
+`services/upgrade-notifications.ts` passes a `kind` variable, but it comes from
+a `kindMap` of `NOTIFICATION_KINDS.*` values, so it is registry-backed.
 
 Consumer: `routes/notifications.ts` reads `kind` straight from the row and
 returns it (`kind: n.kind`); it does not validate against the registry, so an
@@ -84,11 +84,10 @@ export async function emitNotification(
 1. Add `COMPLIANCE_ESCALATION` to the registry.
 2. Change `jobs/sla-breach-checker.ts` and `jobs/compliance-escalation.ts` to
    `NOTIFICATION_KINDS.*`.
-3. Check the `kind` variable in `services/upgrade-notifications.ts`.
-4. Tighten the `createNotification` signature to `NotificationKind`; fix any
+3. Tighten the `createNotification` signature to `NotificationKind`; fix any
    remaining compile errors.
-5. Add the ESLint rule and a unit test that a bad kind is rejected.
-6. Optionally rename to `emitNotification` with a deprecated re-export.
+4. Add the ESLint rule and a unit test that a bad kind is rejected.
+5. Optionally rename to `emitNotification` with a deprecated re-export.
 
 ## 5. Trade-offs
 
