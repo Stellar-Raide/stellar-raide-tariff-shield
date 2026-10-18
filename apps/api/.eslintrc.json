@@ -1,4 +1,0 @@
-{
-  "extends": ["stellar-raide-tariff-shield"],
-  "ignorePatterns": ["dist/**", "node_modules/**"]
-}
