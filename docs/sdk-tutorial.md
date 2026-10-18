@@ -31,6 +31,8 @@ First, install the stellar-raide-tariff-shield SDK and the underlying Stellar SD
 npm install @tariff-shield/sdk @stellar/stellar-sdk
 ```
 
+To check that the SDK can reach the deployed testnet contract from `deployments.json`, run the read-only smoke test from the repo root: `npm run sdk-smoke`.
+
 Now, instantiate the `stellar-raide-tariff-shieldClient`. The client manages RPC connections, transaction building, simulation, and submission.
 
 ```typescript
