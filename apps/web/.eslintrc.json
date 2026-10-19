@@ -1,3 +1,0 @@
-{
-  "extends": ["stellar-raide-tariff-shield", "next/core-web-vitals"]
-}
