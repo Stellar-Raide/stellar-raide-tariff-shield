@@ -105,7 +105,7 @@
     "toml": "^4.2.0"
   },
   "optionalDependencies": {
-    "@tailwindcss/oxide-linux-x64-gnu": "^4.3.3",
+    "@tailwindcss/oxide-linux-x64-gnu": "^4.3.4",
     "lightningcss-darwin-arm64": "^1.33.0",
     "lightningcss-linux-x64-gnu": "^1.33.0"
   }
