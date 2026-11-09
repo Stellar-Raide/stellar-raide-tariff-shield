@@ -52,7 +52,7 @@ jobs:
 
       - name: Evaluate size against thresholds
         id: evaluate
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const lines = parseInt("${{ steps.count.outputs.lines }}", 10);
