@@ -312,3 +312,12 @@ See [CHANGELOG.md](./CHANGELOG.md) for a full history of releases following the 
 ## License
 
 MIT. Contributions welcome — the roadmap section in [ARCHITECTURE.md](./ARCHITECTURE.md) lists scoped tasks with effort labels.
+
+## Resolved Issues
+
+The following issues have been addressed in this release:
+
+- Added issue templates for bug reports and feature requests
+- Added contributing guidelines and CODEOWNERS
+- Improved repository documentation and onboarding
+
